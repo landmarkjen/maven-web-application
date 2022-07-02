@@ -1,0 +1,19 @@
+pipeline{ 
+    agent any
+    
+    tools {maven "maven3.8.5"}
+    
+    stages{
+        stage('clone'){ steps{ git "https://github.com/landmarkjen/maven-web-application" }}
+        stage('2Test&Build'){ steps{sh "mvn clean install"}}
+        stage('3CodeQuality'){ steps{sh "mvn sonar:sonar"}}
+        stage('4UploadArtifacts'){ steps{sh "mvn deploy"}}
+        stage('5deploytouat'){ steps{deploy adapters: [tomcat9(credentialsId: 'visatomcat', path: '', url: 'http://34.216.192.145:8080/')], contextPath: null, war: 'target/*war'}}
+          } 
+      post{
+        always{emailext body: 'jenkins was a pass', recipientProviders: [developers()], subject: 'jenkins testing', to: 'tasontasie@gmail.com'}
+        success{emailext body: 'jenkins was a pass', recipientProviders: [developers()], subject: 'jenkins testing', to: 'tasontasie@gmail.com'}
+        failure{emailext body: 'jenkins was a pass', recipientProviders: [developers()], subject: 'jenkins testing', to: 'tasontasie@gmail.com'}
+          }
+
+        }
